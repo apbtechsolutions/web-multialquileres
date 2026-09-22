@@ -1,0 +1,19 @@
+old_url,new_url,status_code,reason
+https://www.multialquileres.com.pa/,https://www.multialquileres.com.pa/es/,301,La raíz duplicaba la home en español
+https://www.multialquileres.com.pa/es/Vehiculos,https://www.multialquileres.com.pa/es/vehiculos/,301,Slug con mayúscula
+https://www.multialquileres.com.pa/es/es/Vehiculos,https://www.multialquileres.com.pa/es/vehiculos/,301,Enlace interno duplicado del prefijo de idioma
+https://www.multialquileres.com.pa/es/condiciones,https://www.multialquileres.com.pa/es/terminos-y-condiciones/,301,Slug más descriptivo
+https://www.multialquileres.com.pa/es/poli-privac,https://www.multialquileres.com.pa/es/politica-de-privacidad/,301,Slug abreviado
+https://www.multialquileres.com.pa/es/pasos-alquiler,https://www.multialquileres.com.pa/es/como-alquilar/,301,Slug alineado con la intención de búsqueda
+https://www.multialquileres.com.pa/es/cliente-corporativo-reservaciones,https://www.multialquileres.com.pa/es/rentas-corporativas/,301,Slug largo sustituido por uno estable
+https://www.multialquileres.com.pa/es/conf-reserva-faq,https://www.multialquileres.com.pa/es/preguntas-frecuentes/confirmacion-de-reserva/,301,Agrupar la FAQ bajo un directorio legible
+https://www.multialquileres.com.pa/es/req-alq-faq,https://www.multialquileres.com.pa/es/preguntas-frecuentes/requisitos/,301,Agrupar la FAQ bajo un directorio legible
+https://www.multialquileres.com.pa/es/pag-tar-faq,https://www.multialquileres.com.pa/es/preguntas-frecuentes/pagos-y-tarifas/,301,Agrupar la FAQ bajo un directorio legible
+https://www.multialquileres.com.pa/es/camb-canc-faq,https://www.multialquileres.com.pa/es/preguntas-frecuentes/cambios-y-cancelaciones/,301,Agrupar la FAQ bajo un directorio legible
+https://www.multialquileres.com.pa/es/prot-cobe-faq,https://www.multialquileres.com.pa/es/preguntas-frecuentes/proteccion-y-cobertura/,301,Agrupar la FAQ bajo un directorio legible
+https://www.multialquileres.com.pa/es/serv-adc-faq,https://www.multialquileres.com.pa/es/preguntas-frecuentes/servicios-adicionales/,301,Agrupar la FAQ bajo un directorio legible
+https://www.multialquileres.com.pa/en/,https://www.multialquileres.com.pa/es/,301,El inglés no está publicado; se evita una 404 huérfana
+https://www.multialquileres.com.pa/fleet,https://www.multialquileres.com.pa/es/vehiculos/,301,Alias en inglés del CMS, sin página propia
+https://www.multialquileres.com.pa/contact,https://www.multialquileres.com.pa/es/contacto/,301,Alias en inglés del CMS
+https://www.multialquileres.com.pa/faq,https://www.multialquileres.com.pa/es/preguntas-frecuentes/,301,Alias en inglés del CMS
+https://www.multialquileres.com.pa/conditions,https://www.multialquileres.com.pa/es/terminos-y-condiciones/,301,Alias en inglés del CMS

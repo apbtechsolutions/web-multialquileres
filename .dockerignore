@@ -1,0 +1,8 @@
+node_modules
+.next
+.git
+_audit
+.npm-cache
+.env
+.env.local
+*.log

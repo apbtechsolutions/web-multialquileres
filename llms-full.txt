@@ -1,0 +1,69 @@
+# Multialquileres Panamá — ficha ampliada
+
+Esta ficha resume el sitio publicado. No añade certificaciones, notas, premios ni cobertura que la empresa no haya escrito.
+
+## Identidad
+
+- Nombre comercial: Multialquileres Panamá
+- También aparece como: Multi Alquileres Panamá
+- Razón social: Grupo Cáceres, S.A.
+- Actividad: alquiler de autos
+- País: Panamá
+- Idioma del sitio: español (es-PA)
+- URL canónica de la home: https://web.multialquileres.com.pa/es/
+
+## Contacto
+
+- WhatsApp y teléfono principal: +507 6406 7623
+- Correo: info@multialquileres.com.pa
+- Instagram: https://www.instagram.com/multialquilerespanama/
+- Facebook: https://www.facebook.com/multialquilerespanama/
+- TikTok: https://www.tiktok.com/@multialquileres.p
+
+## Dónde entregan
+
+- Oficina Central, Vía Veneto, Bella Vista, Ciudad de Panamá. Horario de calendario publicado: lunes a viernes 08:00–19:00, sábado 08:00–17:00, domingo 08:00–14:00. Teléfonos de sucursal: +507 6585-1514, +507 6073-9474 y fijo +507 380-9334.
+- Plaza Granada, El Cangrejo. Lunes a viernes 08:00–19:00, sábado 08:00–18:00. Teléfono +507 6992-1707 y fijo +507 211-1325.
+- Aeropuerto Internacional de Tocumen (PTY).
+- David, Chiriquí. La página de contacto dice disponibilidad 24/7. Teléfono +507 6755-5355.
+- Aeropuerto Internacional Panamá Pacífico (BLB), con un cargo de lugar publicado de 15 USD.
+
+## Qué se puede alquilar
+
+Cinco categorías y 49 modelos en el catálogo público consultado el 22 de septiembre de 2026. Cada ficha vive en /es/vehiculos/{categoria}/{modelo}/. La tarifa que se muestra es diaria y de referencia. El depósito, cuando el catálogo lo trae en cero, no se afirma.
+
+## Cómo alquilar
+
+1. Indicar lugar y fechas.
+2. Elegir categoría y modelo.
+3. Completar datos.
+4. Pagar y retirar en el punto de entrega.
+
+Esta versión del sitio prepara la solicitud por WhatsApp. No confirma disponibilidad ni cobra.
+
+## Requisitos publicados en los términos
+
+- Regla general de edad: 23 años. Menores de 23 con licencia definitiva, o mayores de 70, pueden tener condiciones distintas.
+- Licencia física vigente.
+- Tarjeta de crédito física del titular para el depósito.
+- Para quien no es panameño: licencia, permiso internacional si aplica, pasaporte y tarjeta internacional, según los términos.
+
+## Cobertura publicada
+
+La cobertura básica cubre daños por accidente, robo total y responsabilidad civil frente a terceros, con deducible. No aplica fuera de Panamá. No cubre uso indebido, alcohol, drogas ni conductores no autorizados en el contrato.
+
+## Servicios adicionales publicados
+
+Sillas para niños (máximo 2 por vehículo), entrega en Tocumen, chofer bilingüe español-inglés, GPS y WiFi portátil. Sujetos a disponibilidad y posible costo extra no publicado.
+
+## Páginas
+
+- Home: /es/
+- Catálogo: /es/vehiculos/
+- Cómo alquilar: /es/como-alquilar/
+- Preguntas: /es/preguntas-frecuentes/
+- Contacto: /es/contacto/
+- Sucursales: /es/sucursales/
+- Empresas: /es/rentas-corporativas/
+- Términos: /es/terminos-y-condiciones/
+- Privacidad: /es/politica-de-privacidad/
