@@ -6,15 +6,19 @@ type PageMetaInput = {
   description: string;
   path: string;
   ogImage?: string;
-  noindex?: boolean;
 };
 
+/**
+ * Metadata por página en el entorno QA (web.multialquileres.com.pa).
+ * Siempre noindex/nofollow/noarchive. Canonical autorreferencial al host QA
+ * (válido junto con noindex). Sin hreflang: no pedimos indexar este host.
+ * El sitio indexable es https://www.multialquileres.com.pa.
+ */
 export function pageMetadata({
   title,
   description,
   path,
   ogImage = site.ogImage,
-  noindex = false,
 }: PageMetaInput): Metadata {
   const url = absoluteUrl(path);
   return {
@@ -22,14 +26,8 @@ export function pageMetadata({
     description,
     alternates: {
       canonical: url,
-      languages: {
-        "es-PA": url,
-        "x-default": url,
-      },
     },
-    robots: noindex
-      ? { index: false, follow: true }
-      : { index: true, follow: true },
+    robots: "noindex, nofollow, noarchive",
     openGraph: {
       type: "website",
       url,

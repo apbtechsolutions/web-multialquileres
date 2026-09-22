@@ -1,11 +1,16 @@
 ---
-description: Dominio público, GitHub y deploy en EasyPanel de Multialquileres
+description: Dominio QA, GitHub y deploy en EasyPanel de Multialquileres
 alwaysApply: true
 ---
 
 # Deploy de Multialquileres
 
-El sitio público es `https://web.multialquileres.com.pa`. Canonical, sitemap, Open Graph y `llms.txt` usan esa URL. No la sustituyas por localhost ni por `www.multialquileres.com.pa`.
+Este código se sirve en QA: `https://web.multialquileres.com.pa`.
+`NEXT_PUBLIC_SITE_URL` y el fallback de `lib/site.ts` usan esa URL.
+
+No indexar este host. Meta robots y `X-Robots-Tag` van en noindex. El sitio
+indexable de producción es `https://www.multialquileres.com.pa` (otro host,
+no este rebuild). No trates `web.*` como canónico indexable.
 
 Repositorio: `https://github.com/apbtechsolutions/web-multialquileres`.
 
@@ -13,6 +18,7 @@ Cuando el usuario pida subir cambios:
 
 1. Haz commit.
 2. Haz push a ese repositorio.
-3. No despliegues. El deploy lo hace el usuario en EasyPanel: `https://panel.apbhub360.com/projects/app-websites/app/apbhub360-qamulti-api`.
+3. No despliegues. El deploy lo hace el usuario en EasyPanel:
+   `https://panel.apbhub360.com/projects/app-websites/app/apbhub360-qamulti-api`.
 
-`NEXT_PUBLIC_SITE_URL` debe ser `https://web.multialquileres.com.pa` en el build de EasyPanel. El contenedor escucha en el puerto 3000.
+En EasyPanel: `NEXT_PUBLIC_SITE_URL=https://web.multialquileres.com.pa`, puerto 3000.

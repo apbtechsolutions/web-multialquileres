@@ -2,7 +2,8 @@
 
 Multialquileres Panamá es la marca de Grupo Cáceres, S.A. para el alquiler de autos en Panamá.
 
-Sitio canónico: https://web.multialquileres.com.pa/es/
+Sitio indexable (producción): https://www.multialquileres.com.pa
+Entorno QA de este rebuild (no indexar): https://web.multialquileres.com.pa
 
 Contacto principal publicado:
 - Teléfono y WhatsApp: +507 6406 7623
@@ -13,7 +14,7 @@ Puntos publicados: oficina de Vía Veneto, Plaza Granada en El Cangrejo, Aeropue
 
 Categorías del catálogo: SUV, hatchback, sedán, pickup y bus.
 
-Páginas principales:
+Páginas útiles en el entorno QA (no para indexación):
 - https://web.multialquileres.com.pa/es/
 - https://web.multialquileres.com.pa/es/vehiculos/
 - https://web.multialquileres.com.pa/es/como-alquilar/

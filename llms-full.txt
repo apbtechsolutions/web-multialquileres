@@ -10,7 +10,8 @@ Esta ficha resume el sitio publicado. No añade certificaciones, notas, premios 
 - Actividad: alquiler de autos
 - País: Panamá
 - Idioma del sitio: español (es-PA)
-- URL canónica de la home: https://web.multialquileres.com.pa/es/
+- Sitio indexable (producción): https://www.multialquileres.com.pa
+- Entorno QA de este rebuild (no indexar): https://web.multialquileres.com.pa/es/
 
 ## Contacto
 

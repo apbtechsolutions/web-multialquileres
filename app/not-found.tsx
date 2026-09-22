@@ -5,7 +5,6 @@ export const metadata = pageMetadata({
   title: "Página no encontrada | Multialquileres Panamá",
   description: "La dirección no existe en el sitio de Multialquileres Panamá.",
   path: "/404/",
-  noindex: true,
 });
 
 export default function NotFound() {

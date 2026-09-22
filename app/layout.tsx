@@ -24,6 +24,8 @@ export const metadata: Metadata = {
     "Multialquileres Panamá, de Grupo Cáceres, S.A., publica alquiler de autos en Ciudad de Panamá, Tocumen, Panamá Pacífico y David.",
   icons: { icon: [{ url: site.favicon }] },
   applicationName: site.name,
+  // QA en web.multialquileres.com.pa: no indexar. El sitio indexable es www.multialquileres.com.pa.
+  robots: "noindex, nofollow, noarchive",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

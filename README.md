@@ -15,7 +15,7 @@ npm run generate:fleet
 
 Copia `.env.example` a `.env.local`.
 
-- `NEXT_PUBLIC_SITE_URL`: URL canónica, sin barra final. En este proyecto es `https://web.multialquileres.com.pa`.
+- `NEXT_PUBLIC_SITE_URL`: URL de este entorno QA, sin barra final: `https://web.multialquileres.com.pa`. No es la URL indexable de producción.
 - `NEXT_PUBLIC_GTM_ID` y `NEXT_PUBLIC_GA_ID`: vacíos por defecto. Solo se cargan si la persona acepta cookies.
 - `NEXT_PUBLIC_WHATSAPP_NUMBER`: número publicado, sin signos. Por defecto `50764067623`.
 
@@ -39,7 +39,9 @@ npm run build
 
 ## 5. Deploy
 
-El sitio público es `https://web.multialquileres.com.pa`. El repositorio es `https://github.com/apbtechsolutions/web-multialquileres`. El deploy lo hace una persona en EasyPanel (`app-websites` / `apbhub360-qamulti-api`). Desde el repositorio solo se hace commit y push.
+Este rebuild se sirve en QA: `https://web.multialquileres.com.pa`. El sitio indexable de producción es `https://www.multialquileres.com.pa` (otro host). Este entorno lleva `noindex` (meta + `X-Robots-Tag`); no debe aparecer en Google.
+
+Repositorio: `https://github.com/apbtechsolutions/web-multialquileres`. Commit y push desde aquí; el deploy lo hace una persona en EasyPanel (`app-websites` / `apbhub360-qamulti-api`).
 
 En EasyPanel, antes de construir:
 
@@ -47,7 +49,7 @@ En EasyPanel, antes de construir:
 - Puerto del contenedor: `3000`
 - Si el servicio no usa el Dockerfile, el arranque es `npm start` (escucha en `0.0.0.0`)
 
-`NEXT_PUBLIC_SITE_URL` tiene que existir en el build. Canonical, sitemap y Open Graph salen de esa variable. Si falta, el código usa `https://web.multialquileres.com.pa`. Los 301 los responde `middleware.ts`.
+`NEXT_PUBLIC_SITE_URL` tiene que existir en el build. Si falta, el código usa `https://web.multialquileres.com.pa`. Los 301 los responde `middleware.ts`.
 
 ## 6. Arquitectura
 
@@ -58,13 +60,15 @@ En EasyPanel, antes de construir:
 - `SEO/`: redirects y enlazado.
 - No hay inglés. `/en` redirige a `/es/` porque el sitio anterior no tenía versión inglesa publicada.
 
-## 7. SEO
+## 7. SEO (QA: no indexar)
 
-Cada ruta exporta title, description, canonical, hreflang `es-PA` y `x-default`, Open Graph y Twitter. Un solo `h1` por página. Las fichas y las FAQ llevan datos estructurados acordes al contenido visible.
+En este host todas las páginas llevan `noindex, nofollow` (layout + `lib/seo.ts`) y la cabecera `X-Robots-Tag: noindex, nofollow, noarchive`. No hay hreflang. El canonical autorreferencial al host QA es válido solo junto con noindex. El sitio que debe indexarse es `https://www.multialquileres.com.pa`.
+
+Cada ruta sigue exportando title, description, Open Graph y Twitter para la preview. Un solo `h1` por página. Las fichas y las FAQ llevan datos estructurados acordes al contenido visible.
 
 ## 8. Sitemap
 
-`app/sitemap.ts` genera `/sitemap.xml` con la home, el catálogo, las fichas, las sucursales, las FAQ y las páginas legales.
+`app/sitemap.ts` puede generar `/sitemap.xml` para uso interno. `robots.txt` no lo anuncia: este host no debe indexarse.
 
 ## 9. Redirects
 
