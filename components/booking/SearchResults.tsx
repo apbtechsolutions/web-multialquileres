@@ -35,13 +35,20 @@ export function SearchResults({ trip, vehicles }: { trip: TripQuery; vehicles: V
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      <p className="rounded-2xl bg-surface px-4 py-3 text-sm text-muted">
-        {pickup ? pickup.name : "Lugar de entrega no indicado"}
-        {trip.desde ? ` · ${trip.desde} ${trip.horaDesde}` : ""}
-        {" → "}
-        {dropoff ? dropoff.name : "Mismo lugar"}
-        {trip.hasta ? ` · ${trip.hasta} ${trip.horaHasta}` : ""}
-        . La tarifa que ves es la diaria de referencia del catálogo publicado. La tarifa del periodo, los cargos de lugar, los extras y el ITBMS los calcula APBHUB360 y todavía no están conectados.
+      <p className="rounded-2xl bg-surface px-4 py-3 text-sm">
+        <span className="block">
+          <span className="font-semibold">Entrega: </span>
+          {pickup ? pickup.name : "Elige el lugar de entrega"}
+          {trip.desde ? ` · ${trip.desde} ${trip.horaDesde}` : " · elige la fecha y la hora"}
+        </span>
+        <span className="mt-1 block">
+          <span className="font-semibold">Devolución: </span>
+          {dropoff ? dropoff.name : "Elige el lugar de devolución"}
+          {trip.hasta ? ` · ${trip.hasta} ${trip.horaHasta}` : " · elige la fecha y la hora"}
+        </span>
+        <span className="mt-2 block text-muted">
+          La tarifa de cada ficha es la diaria de referencia del catálogo. El total depende de las fechas, los lugares y los servicios de la reserva.
+        </span>
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-3">
         <label className="grid gap-1 text-sm font-medium">

@@ -13,11 +13,12 @@ indexable de producción es `https://www.multialquileres.com.pa` (otro host,
 no este rebuild). No trates `web.*` como canónico indexable.
 
 Repositorio: `https://github.com/apbtechsolutions/web-multialquileres`.
+La rama de QA es `main`.
 
-Cuando el usuario pida subir cambios:
+Al terminar un cambio que el usuario pidió, déjalo en QA sin esperar a que diga "súbelo":
 
 1. Haz commit.
-2. Haz push a ese repositorio.
+2. Haz push a `main` de ese repositorio.
 3. No despliegues. El deploy lo hace el usuario en EasyPanel:
    `https://panel.apbhub360.com/projects/app-websites/app/apbhub360-qamulti-api`.
 

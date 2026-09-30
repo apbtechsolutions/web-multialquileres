@@ -9,7 +9,7 @@ import { readTrip } from "@/lib/trip";
 export const metadata = pageMetadata({
   title: "Detalle de la reserva | Multialquileres",
   description:
-    "Completa los datos del conductor para reservar un auto en Multialquileres Panamá. La reserva se registra en APBHUB360 cuando el motor está conectado.",
+    "Completa la entrega, la devolución, las fechas y los datos del conductor para reservar un auto en Multialquileres Panamá.",
   path: "/es/reservar/",
 });
 
@@ -30,7 +30,7 @@ export default async function ReservePage({ searchParams }: { searchParams: Prom
         crumbs={crumbs}
         eyebrow="Checkout"
         title="Detalle de tu reserva"
-        intro="Revisa el modelo, el lugar y las fechas. Al reservar, el sitio intenta registrar la solicitud en APBHUB360. Si el motor no está conectado, no se crea la reserva ni se cobra."
+        intro="Confirma el lugar de entrega, el lugar de devolución y las fechas de la reserva. Después completa los datos del conductor."
       />
       <CheckoutForm trip={trip} vehicle={vehicle} />
     </>

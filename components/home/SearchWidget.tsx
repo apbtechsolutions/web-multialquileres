@@ -1,12 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent } from "react";
 import { branches } from "@/data/branches";
+import type { TripQuery } from "@/lib/trip";
 
-export function SearchWidget() {
+export function SearchWidget({ defaults }: { defaults?: Partial<TripQuery> }) {
   const router = useRouter();
-  const [differentReturn, setDifferentReturn] = useState(false);
 
   function navigate(form: HTMLFormElement, action: "cotizar" | "reservar") {
     const data = new FormData(form);
@@ -25,10 +25,10 @@ export function SearchWidget() {
 
   return (
     <form action="/es/buscar/" method="get" onSubmit={onSubmit} className="grid gap-3 rounded-2xl bg-white p-4 text-ink shadow-xl sm:p-5">
-      <p className="text-sm font-semibold text-brand-dark">Indica lugar y fechas</p>
+      <p className="text-sm font-semibold text-brand-dark">Entrega, devolución y fechas</p>
       <label className="grid gap-1 text-sm font-medium">
         Lugar de entrega
-        <select name="entrega" required className="rounded-lg border border-line px-3 py-2" defaultValue="oficina-via-veneto">
+        <select name="entrega" required className="rounded-lg border border-line px-3 py-2" defaultValue={defaults?.entrega || "oficina-via-veneto"}>
           {branches.map((branch) => (
             <option key={branch.slug} value={branch.slug}>
               {branch.name}
@@ -36,43 +36,32 @@ export function SearchWidget() {
           ))}
         </select>
       </label>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          name="otroLugar"
-          checked={differentReturn}
-          onChange={(event) => setDifferentReturn(event.target.checked)}
-        />
-        Devolver en otro lugar
+      <label className="grid gap-1 text-sm font-medium">
+        Lugar de devolución
+        <select name="devolucion" required className="rounded-lg border border-line px-3 py-2" defaultValue={defaults?.devolucion || defaults?.entrega || "oficina-via-veneto"}>
+          {branches.map((branch) => (
+            <option key={branch.slug} value={branch.slug}>
+              {branch.name}
+            </option>
+          ))}
+        </select>
       </label>
-      {differentReturn ? (
-        <label className="grid gap-1 text-sm font-medium">
-          Lugar de devolución
-          <select name="devolucion" required className="rounded-lg border border-line px-3 py-2" defaultValue="aeropuerto-tocumen">
-            {branches.map((branch) => (
-              <option key={branch.slug} value={branch.slug}>
-                {branch.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      ) : null}
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="grid gap-1 text-sm font-medium">
           Fecha de entrega
-          <input name="desde" type="date" required className="rounded-lg border border-line px-3 py-2" />
+          <input name="desde" type="date" required defaultValue={defaults?.desde} className="rounded-lg border border-line px-3 py-2" />
         </label>
         <label className="grid gap-1 text-sm font-medium">
           Hora de entrega
-          <input name="horaDesde" type="time" required defaultValue="09:00" className="rounded-lg border border-line px-3 py-2" />
+          <input name="horaDesde" type="time" required defaultValue={defaults?.horaDesde || "09:00"} className="rounded-lg border border-line px-3 py-2" />
         </label>
         <label className="grid gap-1 text-sm font-medium">
           Fecha de devolución
-          <input name="hasta" type="date" required className="rounded-lg border border-line px-3 py-2" />
+          <input name="hasta" type="date" required defaultValue={defaults?.hasta} className="rounded-lg border border-line px-3 py-2" />
         </label>
         <label className="grid gap-1 text-sm font-medium">
           Hora de devolución
-          <input name="horaHasta" type="time" required defaultValue="09:00" className="rounded-lg border border-line px-3 py-2" />
+          <input name="horaHasta" type="time" required defaultValue={defaults?.horaHasta || "09:00"} className="rounded-lg border border-line px-3 py-2" />
         </label>
       </div>
       <div className="grid gap-2 sm:grid-cols-2">

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import Link from "next/link";
 import { branches } from "@/data/branches";
 import { formatUsd, site } from "@/lib/site";
@@ -12,31 +12,50 @@ const documents = ["Cédula", "Pasaporte"];
 export function CheckoutForm({ trip, vehicle }: { trip: TripQuery; vehicle: Vehicle | null }) {
   const [error, setError] = useState("");
   const [status, setStatus] = useState<"idle" | "pending" | "blocked" | "sent">("idle");
-  const days = rentalDays(trip.desde, trip.hasta);
-  const pickup = branches.find((branch) => branch.slug === trip.entrega);
-  const dropoff = branches.find((branch) => branch.slug === (trip.devolucion || trip.entrega));
+  const [reserva, setReserva] = useState(trip);
+  const days = rentalDays(reserva.desde, reserva.hasta);
+  const pickup = branches.find((branch) => branch.slug === reserva.entrega);
+  const dropoff = branches.find((branch) => branch.slug === reserva.devolucion);
   const reference = vehicle?.fromPrice != null && days ? vehicle.fromPrice * days : null;
-  const back = `/es/buscar/?${tripSearchParams({ ...trip, vehiculo: "" }).toString()}`;
+  const back = `/es/buscar/?${tripSearchParams({ ...reserva, vehiculo: "" }).toString()}`;
+
+  function setField(key: keyof TripQuery, value: string) {
+    setReserva((current) => ({ ...current, [key]: value }));
+  }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
+    const next: TripQuery = {
+      entrega: String(data.get("entrega") || ""),
+      devolucion: String(data.get("devolucion") || ""),
+      desde: String(data.get("desde") || ""),
+      hasta: String(data.get("hasta") || ""),
+      horaDesde: String(data.get("horaDesde") || ""),
+      horaHasta: String(data.get("horaHasta") || ""),
+      vehiculo: trip.vehiculo,
+    };
+    if (!next.entrega || !next.devolucion || !next.desde || !next.hasta || !next.horaDesde || !next.horaHasta) {
+      setError("La reserva necesita lugar de entrega, lugar de devolución y las fechas con su hora.");
+      return;
+    }
     if (data.get("terminos") !== "on") {
       setError("Para reservar hay que aceptar los términos y la política de privacidad.");
       return;
     }
-    if (trip.desde && trip.hasta && trip.hasta < trip.desde) {
+    if (next.hasta < next.desde) {
       setError("La fecha de devolución no puede ser anterior a la de entrega.");
       return;
     }
+    setReserva(next);
     setError("");
     setStatus("pending");
     const response = await fetch("/api/reservas/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        trip,
+        trip: next,
         vehiculo: vehicle ? { slug: vehicle.slug, name: vehicle.name } : null,
         conductor: {
           nombre: String(data.get("nombre") || ""),
@@ -66,6 +85,15 @@ export function CheckoutForm({ trip, vehicle }: { trip: TripQuery; vehicle: Vehi
             Enviar esta selección a cotizar
           </Link>
         </div>
+        <h2 className="text-xl font-semibold text-brand-dark">Entrega y devolución</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <PlaceField label="Lugar de entrega" name="entrega" value={reserva.entrega} onChange={(value) => setField("entrega", value)} />
+          <PlaceField label="Lugar de devolución" name="devolucion" value={reserva.devolucion} onChange={(value) => setField("devolucion", value)} />
+          <Field label="Fecha de entrega" name="desde" type="date" required value={reserva.desde} onChange={(value) => setField("desde", value)} />
+          <Field label="Hora de entrega" name="horaDesde" type="time" required value={reserva.horaDesde || "09:00"} onChange={(value) => setField("horaDesde", value)} />
+          <Field label="Fecha de devolución" name="hasta" type="date" required value={reserva.hasta} onChange={(value) => setField("hasta", value)} />
+          <Field label="Hora de devolución" name="horaHasta" type="time" required value={reserva.horaHasta || "09:00"} onChange={(value) => setField("horaHasta", value)} />
+        </div>
         <h2 className="text-xl font-semibold text-brand-dark">Datos del conductor</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Nombre" name="nombre" required autoComplete="given-name" />
@@ -87,7 +115,7 @@ export function CheckoutForm({ trip, vehicle }: { trip: TripQuery; vehicle: Vehi
         </div>
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" name="registrarme" className="mt-1" />
-          Quiero una cuenta para ver esta reserva después. No se crea hasta que APBHUB360 confirme el alta.
+          Registrarme para consultar mis reservas.
         </label>
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" name="terminos" required className="mt-1" />
@@ -110,31 +138,35 @@ export function CheckoutForm({ trip, vehicle }: { trip: TripQuery; vehicle: Vehi
         ) : null}
         {status === "sent" ? (
           <p role="status" className="rounded-xl bg-surface p-3 text-sm">
-            APBHUB360 aceptó la solicitud. El número de reserva aparece cuando el motor lo devuelve.
+            Recibimos tu reserva. Te confirmaremos el número por correo o por WhatsApp.
           </p>
         ) : null}
         {status === "blocked" ? (
           <p role="status" className="rounded-xl bg-surface p-3 text-sm">
-            La reserva no se creó. Este ambiente de QA todavía no tiene el contrato de APBHUB360 para registrar reservas, tarifas del periodo ni disponibilidad. No se cobró nada.
+            No pudimos registrar la reserva en este momento. No se realizó ningún cobro. Escríbenos por WhatsApp y te confirmamos la disponibilidad.
           </p>
         ) : null}
         <button type="submit" className="rounded-full bg-brand px-5 py-3 font-semibold text-white hover:bg-brand-dark" disabled={status === "pending"}>
           {status === "pending" ? "Enviando…" : "Reservar ahora"}
         </button>
-        <p className="text-xs text-muted">WhatsApp de la empresa: {site.phone}. La reserva en línea no sustituye esa confirmación hasta que el motor responda.</p>
+        <p className="text-xs text-muted">Si necesitas ayuda con esta reserva, escríbenos por WhatsApp al {site.phone}.</p>
       </form>
       <aside className="h-fit rounded-2xl border border-line bg-white p-5">
         <h2 className="text-lg font-semibold text-brand-dark">Tu reserva</h2>
         <p className="mt-2 font-medium">{vehicle ? vehicle.name : "Modelo por elegir"}</p>
         {vehicle ? <p className="text-sm text-muted">{vehicle.category}</p> : null}
-        <p className="mt-4 text-sm">
-          {pickup ? pickup.name : "Entrega sin indicar"}
-          {trip.desde ? ` · ${trip.desde} ${trip.horaDesde}` : ""}
-        </p>
-        <p className="text-sm">
-          {dropoff ? dropoff.name : "Devolución sin indicar"}
-          {trip.hasta ? ` · ${trip.hasta} ${trip.horaHasta}` : ""}
-        </p>
+        <dl className="mt-4 grid gap-3 text-sm">
+          <div>
+            <dt className="font-semibold">Entrega</dt>
+            <dd>{pickup ? pickup.name : "Elige el lugar de entrega"}</dd>
+            <dd className="text-muted">{reserva.desde ? `${reserva.desde} ${reserva.horaDesde}` : "Elige la fecha y la hora"}</dd>
+          </div>
+          <div>
+            <dt className="font-semibold">Devolución</dt>
+            <dd>{dropoff ? dropoff.name : "Elige el lugar de devolución"}</dd>
+            <dd className="text-muted">{reserva.hasta ? `${reserva.hasta} ${reserva.horaHasta}` : "Elige la fecha y la hora"}</dd>
+          </div>
+        </dl>
         {days ? <p className="mt-3 text-sm">{days} {days === 1 ? "día" : "días"}</p> : null}
         <p className="mt-4 text-sm">
           {reference != null ? (
@@ -151,7 +183,7 @@ export function CheckoutForm({ trip, vehicle }: { trip: TripQuery; vehicle: Vehi
         ) : (
           <p className="mt-1 text-sm text-muted">Depósito: [REQUIERE INFORMACIÓN DEL CLIENTE]</p>
         )}
-        <p className="mt-3 text-xs text-muted">{site.priceDisclaimer} Cargos de sucursal, seguros, conductor adicional e ITBMS no se suman aquí: los debe devolver APBHUB360.</p>
+        <p className="mt-3 text-xs text-muted">{site.priceDisclaimer}</p>
       </aside>
     </div>
   );
@@ -163,17 +195,56 @@ function Field({
   type = "text",
   required = false,
   autoComplete,
+  value,
+  onChange,
 }: {
   label: string;
   name: string;
   type?: string;
   required?: boolean;
   autoComplete?: string;
+  value?: string;
+  onChange?: (value: string) => void;
 }) {
   return (
     <label className="grid gap-1 text-sm font-medium">
       {label}
-      <input name={name} type={type} required={required} autoComplete={autoComplete} className="rounded-lg border border-line px-3 py-2" />
+      <input
+        name={name}
+        type={type}
+        required={required}
+        autoComplete={autoComplete}
+        {...(onChange
+          ? { value: value ?? "", onChange: (event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value) }
+          : {})}
+        className="rounded-lg border border-line px-3 py-2"
+      />
+    </label>
+  );
+}
+
+function PlaceField({
+  label,
+  name,
+  value,
+  onChange,
+}: {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="grid gap-1 text-sm font-medium">
+      {label}
+      <select name={name} required value={value} onChange={(event) => onChange(event.target.value)} className="rounded-lg border border-line px-3 py-2">
+        <option value="">Selecciona un lugar</option>
+        {branches.map((branch) => (
+          <option key={branch.slug} value={branch.slug}>
+            {branch.name}
+          </option>
+        ))}
+      </select>
     </label>
   );
 }
