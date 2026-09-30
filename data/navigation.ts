@@ -18,6 +18,7 @@ export const footerNav = {
     { href: "/es/vehiculos/", label: "Catálogo de vehículos" },
     { href: "/es/como-alquilar/", label: "Cómo alquilar un auto" },
     { href: "/es/cotizar/", label: "Solicitar cotización" },
+    { href: "/es/buscar/", label: "Reservar un auto" },
     { href: "/es/preguntas-frecuentes/", label: "Preguntas frecuentes" },
     { href: "/es/recursos/", label: "Guías de alquiler" },
   ],

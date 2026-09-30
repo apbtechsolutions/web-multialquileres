@@ -14,6 +14,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/es/preguntas-frecuentes/",
     "/es/rentas-corporativas/",
     "/es/cotizar/",
+    "/es/buscar/",
+    "/es/reservar/",
     "/es/sucursales/",
     "/es/recursos/",
     "/es/iniciar-sesion/",

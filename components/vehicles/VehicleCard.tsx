@@ -7,7 +7,15 @@ function countLabel(count: number, singular: string, plural: string) {
   return `${count} ${count === 1 ? singular : plural}`;
 }
 
-export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
+export function VehicleCard({
+  vehicle,
+  quoteHref = `/es/cotizar/?vehiculo=${vehicle.slug}`,
+  reserveHref = `/es/reservar/?vehiculo=${vehicle.slug}`,
+}: {
+  vehicle: Vehicle;
+  quoteHref?: string;
+  reserveHref?: string;
+}) {
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
       <Link href={vehiclePath(vehicle)} className="block bg-surface" aria-label={`Ver ${vehicle.name}`}>
@@ -66,11 +74,11 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
           <Link href={vehiclePath(vehicle)} className="rounded-full border border-brand px-4 py-2 text-sm font-semibold text-brand hover:bg-surface">
             Ver ficha
           </Link>
-          <Link
-            href={`/es/cotizar/?vehiculo=${vehicle.slug}`}
-            className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
-          >
+          <Link href={quoteHref} className="rounded-full border border-brand px-4 py-2 text-sm font-semibold text-brand hover:bg-surface">
             Cotizar
+          </Link>
+          <Link href={reserveHref} className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark">
+            Reservar ahora
           </Link>
         </div>
       </div>

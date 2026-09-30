@@ -119,12 +119,14 @@ export default async function VehiclePage({ params }: { params: Promise<Params> 
               </div>
             ))}
           </dl>
-          <Link
-            href={`/es/cotizar/?vehiculo=${vehicle.slug}`}
-            className="mt-4 inline-flex rounded-full bg-brand px-5 py-3 font-semibold text-white"
-          >
-            Solicitar cotización de este modelo
-          </Link>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link href={`/es/cotizar/?vehiculo=${vehicle.slug}`} className="inline-flex rounded-full border border-brand px-5 py-3 font-semibold text-brand">
+              Cotizar
+            </Link>
+            <Link href={`/es/reservar/?vehiculo=${vehicle.slug}`} className="inline-flex rounded-full bg-brand px-5 py-3 font-semibold text-white">
+              Reservar ahora
+            </Link>
+          </div>
         </div>
       </div>
       {related.length ? (

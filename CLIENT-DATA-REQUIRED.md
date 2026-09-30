@@ -2,6 +2,23 @@
 
 Nada de esta lista se inventó en el sitio. Donde faltaba un dato, la página lo marca o esta ficha lo deja pendiente.
 
+## Motor de reservas APBHUB360
+
+El sitio de QA (`https://web.multialquileres.com.pa`) ya tiene búsqueda (`/es/buscar/`) y checkout (`/es/reservar/`). `https://qa-multi.apbhub360.com/` hoy solo muestra el acceso de la plataforma y redirige a `/login`. No hay un API público de tarifas, sucursales ni reservas.
+
+Para que cotizar y reservar usen ese sistema, hace falta:
+
+- URL base del API de QA (si no es la misma que el panel de login).
+- Token o credenciales de un cliente de servicio, solo en el servidor (`APBHUB360_API_URL`, `APBHUB360_API_TOKEN`). No van en el navegador.
+- Contrato: método, ruta y JSON para buscar disponibilidad (lugar, fechas, horas → modelos con tarifa del periodo, depósito, cargos de sucursal, extras e ITBMS).
+- Contrato para crear la reserva y, si aplica, la cotización, con el identificador que devuelve el sistema.
+- Catálogo de sucursales con el id que usa el motor (en el sitio actual Tocumen es `6` y Oficina Central es `1`) y el equivalente de cada modelo (`modelId`, `bookingBrandId`).
+- Lista oficial de tipos de documento, seguros (por ejemplo Full Cover) y adicionales (conductor adicional), con su precio calculado por el motor.
+- Si el pago se cobra en APBHUB360 o si la web solo registra la reserva.
+- Un ambiente donde se pueda crear una reserva de prueba sin cobrar.
+
+Hasta entonces el botón Reservar ahora abre el checkout, pero `POST /api/reservas/` no registra nada en APBHUB360.
+
 ## Empresa
 
 - RUC de Grupo Cáceres, S.A.
