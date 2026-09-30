@@ -19,7 +19,7 @@ export function RequestForm({ intent, defaultVehicle = "", defaults = {} }: Requ
   const [error, setError] = useState("");
   const [readyLink, setReadyLink] = useState("");
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
@@ -30,6 +30,7 @@ export function RequestForm({ intent, defaultVehicle = "", defaults = {} }: Requ
     const accepted = data.get("consentimiento") === "on";
     const desde = String(data.get("desde") || "");
     const hasta = String(data.get("hasta") || "");
+    const documento = String(data.get("documento") || "").trim();
 
     if (!accepted) {
       setError("Necesitamos tu autorización para usar los datos de esta solicitud.");
@@ -67,6 +68,35 @@ export function RequestForm({ intent, defaultVehicle = "", defaults = {} }: Requ
 
     setError("");
     setReadyLink(whatsappHref(lines.join("\n")));
+
+    // Cotización oficial en Hub (best-effort; WhatsApp sigue siendo el canal visible).
+    if (intent === "cotizacion" && vehicle && desde && hasta) {
+      const [firstName, ...rest] = nombre.split(/\s+/);
+      void fetch("/api/cotizaciones/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trip: {
+            entrega: String(data.get("entrega") || ""),
+            devolucion: String(data.get("devolucion") || ""),
+            desde,
+            hasta,
+            horaDesde: String(data.get("horaDesde") || "09:00"),
+            horaHasta: String(data.get("horaHasta") || "09:00"),
+            vehiculo: vehicle.slug,
+          },
+          vehiculo: { slug: vehicle.slug, id: vehicle.id, name: vehicle.name },
+          conductor: {
+            nombre: firstName || nombre,
+            apellido: rest.join(" ") || nombre,
+            email,
+            telefono,
+            documentoTipo: "Cédula",
+            documento: documento || telefono || email,
+          },
+        }),
+      }).catch(() => undefined);
+    }
   }
 
   return (
@@ -119,7 +149,8 @@ export function RequestForm({ intent, defaultVehicle = "", defaults = {} }: Requ
         Preparar mensaje de WhatsApp
       </button>
       <p className="text-xs text-muted">
-        El formulario no envía los datos a un servidor. Arma un mensaje para el WhatsApp publicado ({site.phone}). La empresa confirma disponibilidad y tarifa.
+        Prepararemos un mensaje de WhatsApp ({site.phone}). Si el motor de reservas está configurado, también
+        registramos una cotización de referencia en APBHUB360 sin cobrar.
       </p>
       {readyLink ? (
         <a href={readyLink} className="rounded-full bg-[#128C7E] px-4 py-3 text-center font-semibold text-white" target="_blank" rel="noopener noreferrer">

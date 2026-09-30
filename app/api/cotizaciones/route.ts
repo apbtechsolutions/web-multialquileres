@@ -4,8 +4,8 @@ import { channelPath, hub360Fetch } from "@/lib/hub360/client";
 import { hub360Config } from "@/lib/hub360/config";
 
 /**
- * Registra reserva oficial en APBHUB360 (Quote → accept).
- * Requiere APBHUB360_API_URL + APBHUB360_API_TOKEN. No cobra.
+ * Crea cotización oficial en APBHUB360 (WhatsApp puede seguir en paralelo).
+ * Body: { trip, vehiculo, conductor }
  */
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -19,52 +19,33 @@ export async function POST(request: Request) {
 
   const payload = body as {
     trip?: Record<string, string>;
-    vehiculo?: { slug?: string; id?: number | string; name?: string } | null;
-    conductor?: Record<string, string> | null;
+    vehiculo?: { slug?: string; id?: number | string; name?: string };
+    conductor?: Record<string, string>;
     idempotency_key?: string;
   };
 
-  const correlationId = globalThis.crypto?.randomUUID?.() || `res-${Date.now()}`;
+  const correlationId = globalThis.crypto?.randomUUID?.() || `cot-${Date.now()}`;
   const idempotencyKey =
     payload.idempotency_key ||
     request.headers.get("idempotency-key") ||
-    `reserva-${correlationId}`;
+    `cotizacion-${correlationId}`;
 
   const mapped = bookingPayloadFromWeb({
     trip: payload.trip || {},
     vehiculo: payload.vehiculo,
     conductor: payload.conductor,
     correlationId,
-    externalReference: `WEB-RES-${correlationId.slice(0, 8)}`,
+    externalReference: `WEB-QUOTE-${correlationId.slice(0, 8)}`,
   });
 
-  if (!mapped.start_datetime || !mapped.end_datetime) {
+  if (!mapped.customer?.document_number && !mapped.customer?.email) {
     return NextResponse.json(
-      { ok: false, code: "missing_dates", detail: "Faltan fechas de entrega o devolución." },
-      { status: 400 },
-    );
-  }
-  if (!mapped.customer?.first_name || !mapped.customer?.document_number) {
-    return NextResponse.json(
-      { ok: false, code: "missing_driver", detail: "Nombre y documento del conductor son obligatorios." },
-      { status: 400 },
-    );
-  }
-  if (!mapped.slug && mapped.legacy_catalog_id == null) {
-    return NextResponse.json(
-      { ok: false, code: "missing_vehicle", detail: "Falta el vehículo." },
+      { ok: false, code: "missing_identity", detail: "Documento o correo del conductor requerido." },
       { status: 400 },
     );
   }
 
-  const cfg = hub360Config();
-  const path = cfg.bookingPath.startsWith("http")
-    ? cfg.bookingPath
-    : cfg.bookingPath.startsWith("/")
-      ? cfg.bookingPath
-      : channelPath("/reservations/");
-
-  const result = await hub360Fetch<Record<string, unknown>>(path, {
+  const result = await hub360Fetch<Record<string, unknown>>(channelPath("/quotes/"), {
     method: "POST",
     body: mapped,
     idempotencyKey,
@@ -86,8 +67,7 @@ export async function POST(request: Request) {
   return NextResponse.json(
     {
       ok: true,
-      reservation: result.data,
-      reservation_number: result.data.reservation_number,
+      quote: result.data,
       correlation_id: result.correlationId,
     },
     { status: 201 },

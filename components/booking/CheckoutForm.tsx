@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { branches } from "@/data/branches";
 import { formatUsd, site } from "@/lib/site";
@@ -9,19 +9,85 @@ import type { Vehicle } from "@/types/content";
 
 const documents = ["Cédula", "Pasaporte"];
 
+type OfficialPricing = {
+  available: boolean;
+  total: number | null;
+  dailyRate: number | null;
+  deposit: number | null;
+  days: number | null;
+  currency: string;
+};
+
+function toNumber(value: unknown): number | null {
+  if (value == null || value === "") return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
 export function CheckoutForm({ trip, vehicle }: { trip: TripQuery; vehicle: Vehicle | null }) {
   const [error, setError] = useState("");
   const [status, setStatus] = useState<"idle" | "pending" | "blocked" | "sent">("idle");
+  const [confirmation, setConfirmation] = useState("");
   const [reserva, setReserva] = useState(trip);
+  const [official, setOfficial] = useState<OfficialPricing | null>(null);
+  const [pricingStatus, setPricingStatus] = useState<"idle" | "loading" | "ready" | "unavailable" | "offline">("idle");
   const days = rentalDays(reserva.desde, reserva.hasta);
   const pickup = branches.find((branch) => branch.slug === reserva.entrega);
   const dropoff = branches.find((branch) => branch.slug === reserva.devolucion);
-  const reference = vehicle?.fromPrice != null && days ? vehicle.fromPrice * days : null;
+  const catalogReference = vehicle?.fromPrice != null && days ? vehicle.fromPrice * days : null;
   const back = `/es/buscar/?${tripSearchParams({ ...reserva, vehiculo: "" }).toString()}`;
 
   function setField(key: keyof TripQuery, value: string) {
     setReserva((current) => ({ ...current, [key]: value }));
   }
+
+  useEffect(() => {
+    if (!vehicle || !reserva.desde || !reserva.hasta || !reserva.entrega) {
+      setOfficial(null);
+      setPricingStatus("idle");
+      return;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      setPricingStatus("loading");
+      try {
+        const response = await fetch("/api/disponibilidad/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            trip: reserva,
+            vehiculo: { slug: vehicle.slug, id: vehicle.id, name: vehicle.name },
+          }),
+        });
+        const data = await response.json().catch(() => null);
+        if (cancelled) return;
+        if (!response.ok || !data?.ok) {
+          setOfficial(null);
+          setPricingStatus(response.status === 503 ? "offline" : "unavailable");
+          return;
+        }
+        const pricing = data.pricing || null;
+        setOfficial({
+          available: Boolean(data.available),
+          total: toNumber(pricing?.total),
+          dailyRate: toNumber(pricing?.daily_rate),
+          deposit: toNumber(pricing?.deposit),
+          days: toNumber(pricing?.days),
+          currency: String(pricing?.currency || "USD"),
+        });
+        setPricingStatus(data.available ? "ready" : "unavailable");
+      } catch {
+        if (!cancelled) {
+          setOfficial(null);
+          setPricingStatus("offline");
+        }
+      }
+    }, 350);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [vehicle, reserva.entrega, reserva.devolucion, reserva.desde, reserva.hasta, reserva.horaDesde, reserva.horaHasta]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -50,13 +116,14 @@ export function CheckoutForm({ trip, vehicle }: { trip: TripQuery; vehicle: Vehi
     }
     setReserva(next);
     setError("");
+    setConfirmation("");
     setStatus("pending");
     const response = await fetch("/api/reservas/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         trip: next,
-        vehiculo: vehicle ? { slug: vehicle.slug, name: vehicle.name } : null,
+        vehiculo: vehicle ? { slug: vehicle.slug, name: vehicle.name, id: vehicle.id } : null,
         conductor: {
           nombre: String(data.get("nombre") || ""),
           apellido: String(data.get("apellido") || ""),
@@ -71,7 +138,23 @@ export function CheckoutForm({ trip, vehicle }: { trip: TripQuery; vehicle: Vehi
         },
       }),
     });
-    setStatus(response.ok ? "sent" : "blocked");
+    const payload = await response.json().catch(() => null);
+    if (response.ok && payload?.ok) {
+      setStatus("sent");
+      const number = payload.reservation_number || payload.reservation?.reservation_number;
+      setConfirmation(
+        number
+          ? `Reserva registrada: ${number}. Te confirmaremos los detalles por correo o WhatsApp.`
+          : "Recibimos tu reserva. Te confirmaremos el número por correo o por WhatsApp.",
+      );
+      return;
+    }
+    setStatus("blocked");
+    setError(
+      typeof payload?.detail === "string" && payload.detail
+        ? payload.detail
+        : "No pudimos registrar la reserva en este momento. No se realizó ningún cobro.",
+    );
   }
 
   return (
@@ -138,12 +221,12 @@ export function CheckoutForm({ trip, vehicle }: { trip: TripQuery; vehicle: Vehi
         ) : null}
         {status === "sent" ? (
           <p role="status" className="rounded-xl bg-surface p-3 text-sm">
-            Recibimos tu reserva. Te confirmaremos el número por correo o por WhatsApp.
+            {confirmation || "Recibimos tu reserva. Te confirmaremos el número por correo o por WhatsApp."}
           </p>
         ) : null}
         {status === "blocked" ? (
           <p role="status" className="rounded-xl bg-surface p-3 text-sm">
-            No pudimos registrar la reserva en este momento. No se realizó ningún cobro. Escríbenos por WhatsApp y te confirmamos la disponibilidad.
+            No se realizó ningún cobro. Si el problema continúa, escríbenos por WhatsApp y te confirmamos la disponibilidad.
           </p>
         ) : null}
         <button type="submit" className="rounded-full bg-brand px-5 py-3 font-semibold text-white hover:bg-brand-dark" disabled={status === "pending"}>
@@ -168,20 +251,37 @@ export function CheckoutForm({ trip, vehicle }: { trip: TripQuery; vehicle: Vehi
           </div>
         </dl>
         {days ? <p className="mt-3 text-sm">{days} {days === 1 ? "día" : "días"}</p> : null}
-        <p className="mt-4 text-sm">
-          {reference != null ? (
-            <>
-              Referencia de catálogo: <span className="font-semibold">{formatUsd(reference)}</span>
-              {vehicle?.fromPrice != null ? ` (${formatUsd(vehicle.fromPrice)} × ${days} ${days === 1 ? "día" : "días"})` : ""}.
-            </>
-          ) : (
-            "Sin tarifa de referencia para este modelo."
-          )}
-        </p>
-        {vehicle?.deposit != null ? (
+        {pricingStatus === "loading" ? <p className="mt-4 text-sm text-muted">Consultando tarifa oficial…</p> : null}
+        {pricingStatus === "ready" && official?.total != null ? (
+          <p className="mt-4 text-sm">
+            Total estimado oficial: <span className="font-semibold">{formatUsd(official.total)}</span>
+            {official.dailyRate != null
+              ? ` (${formatUsd(official.dailyRate)} × ${official.days ?? days} ${(official.days ?? days) === 1 ? "día" : "días"})`
+              : ""}
+            .
+          </p>
+        ) : null}
+        {pricingStatus === "unavailable" ? (
+          <p className="mt-4 text-sm text-red-700">Sin disponibilidad para esas fechas con este modelo.</p>
+        ) : null}
+        {pricingStatus === "offline" || pricingStatus === "idle" ? (
+          <p className="mt-4 text-sm">
+            {catalogReference != null ? (
+              <>
+                Referencia de catálogo: <span className="font-semibold">{formatUsd(catalogReference)}</span>
+                {vehicle?.fromPrice != null ? ` (${formatUsd(vehicle.fromPrice)} × ${days} ${days === 1 ? "día" : "días"})` : ""}.
+              </>
+            ) : (
+              "Sin tarifa de referencia para este modelo."
+            )}
+          </p>
+        ) : null}
+        {official?.deposit != null ? (
+          <p className="mt-1 text-sm text-muted">Depósito estimado: {formatUsd(official.deposit)}</p>
+        ) : vehicle?.deposit != null ? (
           <p className="mt-1 text-sm text-muted">Depósito de referencia: {formatUsd(vehicle.deposit)}</p>
         ) : (
-          <p className="mt-1 text-sm text-muted">Depósito: [REQUIERE INFORMACIÓN DEL CLIENTE]</p>
+          <p className="mt-1 text-sm text-muted">Depósito: se confirma al reservar.</p>
         )}
         <p className="mt-3 text-xs text-muted">{site.priceDisclaimer}</p>
       </aside>
@@ -214,9 +314,12 @@ function Field({
         type={type}
         required={required}
         autoComplete={autoComplete}
-        {...(onChange
-          ? { value: value ?? "", onChange: (event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value) }
-          : {})}
+        value={value}
+        onChange={
+          onChange
+            ? (event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)
+            : undefined
+        }
         className="rounded-lg border border-line px-3 py-2"
       />
     </label>
@@ -237,8 +340,14 @@ function PlaceField({
   return (
     <label className="grid gap-1 text-sm font-medium">
       {label}
-      <select name={name} required value={value} onChange={(event) => onChange(event.target.value)} className="rounded-lg border border-line px-3 py-2">
-        <option value="">Selecciona un lugar</option>
+      <select
+        name={name}
+        required
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="rounded-lg border border-line px-3 py-2"
+      >
+        <option value="">Selecciona…</option>
         {branches.map((branch) => (
           <option key={branch.slug} value={branch.slug}>
             {branch.name}
